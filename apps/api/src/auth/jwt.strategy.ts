@@ -11,7 +11,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly usersService: UsersService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (req: any) => (req?.cookies as any)?.token ?? null,
+      ]),
+      passReqToCallback: false,
       ignoreExpiration: false,
       secretOrKey: config.get<string>('JWT_SECRET'),
     });
