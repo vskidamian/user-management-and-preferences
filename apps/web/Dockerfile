@@ -1,15 +1,19 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
 
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-COPY package.json ./
-COPY vite.config.ts tsconfig.json index.html ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/ ./packages/
+COPY apps/web/package.json ./apps/web/
 
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
-COPY src ./src
+COPY apps/web/tsconfig.json apps/web/vite.config.ts apps/web/index.html ./apps/web/
+COPY apps/web/src ./apps/web/src
+
+WORKDIR /app/apps/web
 
 EXPOSE 5173
 
