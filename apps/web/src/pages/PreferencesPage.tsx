@@ -1,22 +1,27 @@
-import { useEffect, useRef } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useTheme } from '../hooks/useTheme';
-import { getPreferences, updatePreferences, type Preference } from '../api';
-import { preferencesSchema, VALID_COLUMNS, VALID_SORTS, type PreferencesFormData } from '../schemas';
+import { useEffect, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTheme, applyTheme, getStoredTheme } from "../hooks/useTheme";
+import { getPreferences, updatePreferences, type Preference } from "../api";
+import {
+  preferencesSchema,
+  VALID_COLUMNS,
+  VALID_SORTS,
+  type PreferencesFormData,
+} from "../schemas";
 
 const COLUMN_LABELS: Record<string, string> = {
-  firstName: 'First Name',
-  lastName: 'Last Name',
-  email: 'Email',
-  role: 'Role',
+  firstName: "First Name",
+  lastName: "Last Name",
+  email: "Email",
+  role: "Role",
 };
 
 const SORT_LABELS: Record<string, string> = {
-  firstName: 'First Name',
-  lastName: 'Last Name',
-  email: 'Email',
+  firstName: "First Name",
+  lastName: "Last Name",
+  email: "Email",
 };
 
 export function PreferencesPage() {
@@ -25,7 +30,7 @@ export function PreferencesPage() {
   const savedRef = useRef<Preference | null>(null);
 
   const { data } = useQuery({
-    queryKey: ['preferences'],
+    queryKey: ["preferences"],
     queryFn: getPreferences,
   });
 
@@ -34,77 +39,92 @@ export function PreferencesPage() {
     handleSubmit,
     control,
     reset,
-    watch,
     formState: { errors, isDirty },
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
-      theme: 'light',
-      tablePreferences: { visibleColumns: [...VALID_COLUMNS], defaultSort: 'firstName' },
+      theme: getStoredTheme(),
+      tablePreferences: {
+        visibleColumns: [...VALID_COLUMNS],
+        defaultSort: "firstName",
+      },
     },
   });
 
   useEffect(() => {
     if (data) {
       savedRef.current = data;
+      setTheme(data.theme);
       reset({
         theme: data.theme,
         tablePreferences: data.tablePreferences,
       });
     }
-  }, [data, reset]);
+  }, [data, reset, setTheme]);
 
-  const liveTheme = watch('theme');
+  const liveTheme = useWatch({ control, name: "theme" });
+
   useEffect(() => {
-    setTheme(liveTheme);
-  }, [liveTheme, setTheme]);
+    applyTheme(liveTheme);
+  }, [liveTheme]);
 
   const { mutate: save, isPending: isSaving } = useMutation({
     mutationFn: updatePreferences,
     onSuccess: (updated) => {
       savedRef.current = updated;
-      queryClient.setQueryData(['preferences'], updated);
-      reset({ theme: updated.theme, tablePreferences: updated.tablePreferences });
+      setTheme(updated.theme);
+      queryClient.setQueryData(["preferences"], updated);
+      reset({
+        theme: updated.theme,
+        tablePreferences: updated.tablePreferences,
+      });
     },
     onError: (err) => {
-      console.error('Failed to save preferences', err);
+      console.error("Failed to save preferences", err);
     },
   });
 
   const handleReset = () => {
     if (savedRef.current) {
-      reset({ theme: savedRef.current.theme, tablePreferences: savedRef.current.tablePreferences });
+      reset({
+        theme: savedRef.current.theme,
+        tablePreferences: savedRef.current.tablePreferences,
+      });
       setTheme(savedRef.current.theme);
     }
   };
 
   const lastSavedAt = savedRef.current?.updatedAt
     ? new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
+        dateStyle: "medium",
+        timeStyle: "short",
       }).format(new Date(savedRef.current.updatedAt))
     : null;
 
   return (
     <div className="max-w-lg space-y-8">
-      <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Preferences</h1>
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+        Preferences
+      </h1>
 
       <form onSubmit={handleSubmit((d) => save(d))} className="space-y-6">
         {/* Theme */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-3">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Theme</h2>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+            Theme
+          </h2>
           <Controller
             control={control}
             name="theme"
             render={({ field }) => (
               <div className="flex gap-3">
-                {(['light', 'dark'] as const).map((t) => (
+                {(["light", "dark"] as const).map((t) => (
                   <label
                     key={t}
                     className={`flex items-center gap-2 cursor-pointer px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                       field.value === t
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+                        : "border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                     }`}
                   >
                     <input
@@ -114,7 +134,8 @@ export function PreferencesPage() {
                       checked={field.value === t}
                       onChange={() => field.onChange(t)}
                     />
-                    {t === 'light' ? '☀️' : '🌙'} {t.charAt(0).toUpperCase() + t.slice(1)}
+                    {t === "light" ? "☀️" : "🌙"}{" "}
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
                   </label>
                 ))}
               </div>
@@ -141,7 +162,7 @@ export function PreferencesPage() {
                   <input
                     type="checkbox"
                     value={col}
-                    {...register('tablePreferences.visibleColumns')}
+                    {...register("tablePreferences.visibleColumns")}
                     className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
                   {COLUMN_LABELS[col]}
@@ -160,7 +181,7 @@ export function PreferencesPage() {
               Default sort
             </label>
             <select
-              {...register('tablePreferences.defaultSort')}
+              {...register("tablePreferences.defaultSort")}
               className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               {VALID_SORTS.map((s) => (
@@ -180,7 +201,7 @@ export function PreferencesPage() {
               disabled={!isDirty || isSaving}
               className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg px-4 py-2 text-sm transition-colors"
             >
-              {isSaving ? 'Saving…' : 'Save'}
+              {isSaving ? "Saving…" : "Save"}
             </button>
             <button
               type="button"
@@ -191,7 +212,9 @@ export function PreferencesPage() {
               Reset
             </button>
             {isDirty && (
-              <span className="text-xs text-amber-600 dark:text-amber-400">Unsaved changes</span>
+              <span className="text-xs text-amber-600 dark:text-amber-400">
+                Unsaved changes
+              </span>
             )}
           </div>
           {lastSavedAt && (

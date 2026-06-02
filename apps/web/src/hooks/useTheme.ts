@@ -1,27 +1,28 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-type Theme = 'light' | 'dark';
+type Theme = "light" | "dark";
 
-function applyTheme(theme: Theme) {
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
+export function getStoredTheme(): Theme {
+  return localStorage.getItem("theme") === "dark" ? "dark" : "light";
+}
+
+export function applyTheme(theme: Theme) {
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark");
   } else {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove("dark");
   }
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme');
-    return stored === 'dark' ? 'dark' : 'light';
-  });
+  const [theme, setThemeState] = useState<Theme>(getStoredTheme);
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
   const setTheme = useCallback((next: Theme) => {
-    localStorage.setItem('theme', next);
+    localStorage.setItem("theme", next);
     setThemeState(next);
   }, []);
 
