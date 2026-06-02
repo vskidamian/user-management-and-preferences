@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTheme } from '../hooks/useTheme';
-import { api } from '../api';
+import { getPreferences, updatePreferences, type Preference } from '../api';
 
 const VALID_COLUMNS = ['firstName', 'lastName', 'email', 'role'] as const;
 const VALID_SORTS = ['firstName', 'lastName', 'email'] as const;
@@ -32,11 +32,6 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-interface Preference extends FormData {
-  _id: string;
-  updatedAt: string;
-}
-
 export function PreferencesPage() {
   const { setTheme } = useTheme();
   const queryClient = useQueryClient();
@@ -44,7 +39,7 @@ export function PreferencesPage() {
 
   const { data } = useQuery({
     queryKey: ['preferences'],
-    queryFn: () => api.get<Preference>('/preferences'),
+    queryFn: getPreferences,
   });
 
   const {
@@ -78,7 +73,7 @@ export function PreferencesPage() {
   }, [liveTheme, setTheme]);
 
   const save = useMutation({
-    mutationFn: (formData: FormData) => api.put<Preference>('/preferences', formData),
+    mutationFn: updatePreferences,
     onSuccess: (updated) => {
       savedRef.current = updated;
       queryClient.setQueryData(['preferences'], updated);

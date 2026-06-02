@@ -1,25 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../api';
+import { getMe, type Me } from '../api';
 
-export interface Organization {
-  _id: string;
-  name: string;
-}
-
-export interface Me {
-  _id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'member';
-  organizationId: Organization;
-  isActive: boolean;
-}
+export type { Me };
 
 export function useMe() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['me'],
-    queryFn: () => api.get<Me>('/auth/me'),
+    queryFn: getMe,
     retry: false,
     staleTime: Infinity,
   });

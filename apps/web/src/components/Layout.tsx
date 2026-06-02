@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMe } from '../hooks/useMe';
-import { api } from '../api';
+import { logout as logoutRequest } from '../api';
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
   const queryClient = useQueryClient();
 
   const logout = useMutation({
-    mutationFn: () => api.post('/auth/logout'),
+    mutationFn: logoutRequest,
     onSuccess: () => {
       queryClient.clear();
       navigate('/login');

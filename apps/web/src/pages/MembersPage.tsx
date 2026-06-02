@@ -3,22 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMe } from '../hooks/useMe';
-import { api, ApiError } from '../api';
-
-interface Member {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: 'admin' | 'member';
-}
-
-interface Preference {
-  tablePreferences: {
-    visibleColumns: string[];
-    defaultSort: string;
-  };
-}
+import { getUsers, createUser, getPreferences, ApiError, type Member } from '../api';
 
 const ALL_COLUMNS = ['firstName', 'lastName', 'email', 'role'] as const;
 
@@ -45,12 +30,12 @@ export function MembersPage() {
 
   const { data: members = [], isLoading: membersLoading } = useQuery({
     queryKey: ['users'],
-    queryFn: () => api.get<Member[]>('/users'),
+    queryFn: getUsers,
   });
 
   const { data: preferences } = useQuery({
     queryKey: ['preferences'],
-    queryFn: () => api.get<Preference>('/preferences'),
+    queryFn: getPreferences,
   });
 
   const visibleColumns: string[] =
@@ -73,7 +58,7 @@ export function MembersPage() {
   } = useForm<AddUserFormData>({ resolver: zodResolver(addUserSchema) });
 
   const addUser = useMutation({
-    mutationFn: (data: AddUserFormData) => api.post('/users', data),
+    mutationFn: createUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       reset();

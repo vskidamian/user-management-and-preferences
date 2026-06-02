@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router';
-import { api, ApiError } from '../api';
+import { login, ApiError } from '../api';
 
 const schema = z.object({
   email: z.string().email('Invalid email'),
@@ -24,7 +24,7 @@ export function LoginPage() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const mutation = useMutation({
-    mutationFn: (data: FormData) => api.post('/auth/login', data),
+    mutationFn: login,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
       navigate('/members');
