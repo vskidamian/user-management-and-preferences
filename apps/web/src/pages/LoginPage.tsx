@@ -2,7 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router';
-import { login, ApiError } from '../api';
+import { login, handleApiError } from '../api';
+import { FormRootError } from '../components/FormRootError';
 import { loginSchema, type LoginFormData } from '../schemas';
 
 export function LoginPage() {
@@ -22,13 +23,9 @@ export function LoginPage() {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
       navigate('/members');
     },
-    onError: (err) => {
-      if (err instanceof ApiError && err.status === 401) {
-        setError('root', { message: 'Invalid email or password' });
-      } else {
-        setError('root', { message: 'Something went wrong. Please try again.' });
-      }
-    },
+    onError: (err) => handleApiError(err, setError, {
+      401: { field: 'root', message: 'Invalid email or password' },
+    }),
   });
 
   return (
@@ -36,11 +33,7 @@ export function LoginPage() {
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow p-8 space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sign in</h1>
 
-        {errors.root && (
-          <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-3">
-            {errors.root.message}
-          </p>
-        )}
+        <FormRootError error={errors.root} />
 
         <form onSubmit={handleSubmit((d) => mutate(d))} className="space-y-4">
           <div>

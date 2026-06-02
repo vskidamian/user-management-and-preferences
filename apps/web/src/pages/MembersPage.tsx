@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMe } from '../hooks/useMe';
-import { getUsers, createUser, getPreferences, ApiError, type Member } from '../api';
+import { getUsers, createUser, getPreferences, handleApiError, type Member } from '../api';
+import { FormRootError } from '../components/FormRootError';
 import { addUserSchema, type AddUserFormData } from '../schemas';
 
 const ALL_COLUMNS = ['firstName', 'lastName', 'email', 'role'] as const;
@@ -53,13 +54,9 @@ export function MembersPage() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       reset();
     },
-    onError: (err) => {
-      if (err instanceof ApiError && err.status === 409) {
-        setError('email', { message: 'Email already in use' });
-      } else {
-        setError('root', { message: 'Failed to create user. Please try again.' });
-      }
-    },
+    onError: (err) => handleApiError(err, setError, {
+      409: { field: 'email', message: 'Email already in use' },
+    }, 'Failed to create user. Please try again.'),
   });
 
   return (
@@ -124,11 +121,7 @@ export function MembersPage() {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-4">
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">Add member</h2>
 
-          {errors.root && (
-            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-3">
-              {errors.root.message}
-            </p>
-          )}
+          <FormRootError error={errors.root} />
 
           <form
             onSubmit={handleSubmit((d) => addUser(d))}

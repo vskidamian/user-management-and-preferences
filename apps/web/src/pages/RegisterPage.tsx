@@ -2,7 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router';
-import { register as registerUser, ApiError } from '../api';
+import { register as registerUser, handleApiError } from '../api';
+import { FormRootError } from '../components/FormRootError';
 import { registerSchema, type RegisterFormData } from '../schemas';
 
 type FormField = { name: keyof RegisterFormData; label: string; type: string; autoComplete: string };
@@ -24,13 +25,9 @@ export function RegisterPage() {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
       navigate('/members');
     },
-    onError: (err) => {
-      if (err instanceof ApiError && err.status === 409) {
-        setError('email', { message: 'Email already in use' });
-      } else {
-        setError('root', { message: 'Something went wrong. Please try again.' });
-      }
-    },
+    onError: (err) => handleApiError(err, setError, {
+      409: { field: 'email', message: 'Email already in use' },
+    }),
   });
 
   const fields: FormField[] = [
@@ -46,11 +43,7 @@ export function RegisterPage() {
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow p-8 space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create account</h1>
 
-        {errors.root && (
-          <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-3">
-            {errors.root.message}
-          </p>
-        )}
+        <FormRootError error={errors.root} />
 
         <form onSubmit={handleSubmit((d) => mutate(d))} className="space-y-4">
           {fields.map(({ name, label, type, autoComplete }) => (
