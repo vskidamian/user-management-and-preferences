@@ -47,7 +47,7 @@ export function MembersPage() {
     formState: { errors },
   } = useForm<AddUserFormData>({ resolver: zodResolver(addUserSchema) });
 
-  const addUser = useMutation({
+  const { mutate: addUser, isPending: isAddingUser } = useMutation({
     mutationFn: createUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -131,7 +131,7 @@ export function MembersPage() {
           )}
 
           <form
-            onSubmit={handleSubmit((d) => addUser.mutate(d))}
+            onSubmit={handleSubmit((d) => addUser(d))}
             className="grid grid-cols-1 sm:grid-cols-2 gap-4"
           >
             {(
@@ -175,10 +175,10 @@ export function MembersPage() {
             <div className="sm:col-span-2">
               <button
                 type="submit"
-                disabled={addUser.isPending}
+                disabled={isAddingUser}
                 className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg px-4 py-2 text-sm transition-colors"
               >
-                {addUser.isPending ? 'Adding…' : 'Add member'}
+                {isAddingUser ? 'Adding…' : 'Add member'}
               </button>
             </div>
           </form>

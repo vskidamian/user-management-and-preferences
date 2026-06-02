@@ -59,7 +59,7 @@ export function PreferencesPage() {
     setTheme(liveTheme);
   }, [liveTheme, setTheme]);
 
-  const save = useMutation({
+  const { mutate: save, isPending: isSaving } = useMutation({
     mutationFn: updatePreferences,
     onSuccess: (updated) => {
       savedRef.current = updated;
@@ -89,7 +89,7 @@ export function PreferencesPage() {
     <div className="max-w-lg space-y-8">
       <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Preferences</h1>
 
-      <form onSubmit={handleSubmit((d) => save.mutate(d))} className="space-y-6">
+      <form onSubmit={handleSubmit((d) => save(d))} className="space-y-6">
         {/* Theme */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-3">
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">Theme</h2>
@@ -177,10 +177,10 @@ export function PreferencesPage() {
           <div className="flex items-center gap-3">
             <button
               type="submit"
-              disabled={!isDirty || save.isPending}
+              disabled={!isDirty || isSaving}
               className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg px-4 py-2 text-sm transition-colors"
             >
-              {save.isPending ? 'Saving…' : 'Save'}
+              {isSaving ? 'Saving…' : 'Save'}
             </button>
             <button
               type="button"

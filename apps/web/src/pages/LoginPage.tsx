@@ -16,7 +16,7 @@ export function LoginPage() {
     setError,
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
-  const mutation = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: login,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -42,7 +42,7 @@ export function LoginPage() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="space-y-4">
+        <form onSubmit={handleSubmit((d) => mutate(d))} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
@@ -75,10 +75,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            disabled={mutation.isPending}
+            disabled={isPending}
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg px-4 py-2 text-sm transition-colors"
           >
-            {mutation.isPending ? 'Signing in…' : 'Sign in'}
+            {isPending ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 

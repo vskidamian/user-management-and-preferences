@@ -13,7 +13,7 @@ export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const logout = useMutation({
+  const { mutate: logout, isPending: isLogoutPending } = useMutation({
     mutationFn: logoutRequest,
     onSuccess: () => {
       queryClient.clear();
@@ -54,8 +54,8 @@ export function Layout({ children }: LayoutProps) {
             )}
 
             <button
-              onClick={() => logout.mutate()}
-              disabled={logout.isPending}
+              onClick={() => logout()}
+              disabled={isLogoutPending}
               className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-50 transition-colors"
             >
               Logout

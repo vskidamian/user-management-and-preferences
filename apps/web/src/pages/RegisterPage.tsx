@@ -5,6 +5,8 @@ import { useNavigate, Link } from 'react-router';
 import { register as registerUser, ApiError } from '../api';
 import { registerSchema, type RegisterFormData } from '../schemas';
 
+type FormField = { name: keyof RegisterFormData; label: string; type: string; autoComplete: string };
+
 export function RegisterPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -16,7 +18,7 @@ export function RegisterPage() {
     setError,
   } = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) });
 
-  const mutation = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: registerUser,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
@@ -31,12 +33,12 @@ export function RegisterPage() {
     },
   });
 
-  const fields = [
-    { name: 'firstName' as const, label: 'First name', type: 'text', autoComplete: 'given-name' },
-    { name: 'lastName' as const, label: 'Last name', type: 'text', autoComplete: 'family-name' },
-    { name: 'email' as const, label: 'Email', type: 'email', autoComplete: 'email' },
-    { name: 'organizationName' as const, label: 'Organization name', type: 'text', autoComplete: 'organization' },
-    { name: 'password' as const, label: 'Password', type: 'password', autoComplete: 'new-password' },
+  const fields: FormField[] = [
+    { name: 'firstName', label: 'First name', type: 'text', autoComplete: 'given-name' },
+    { name: 'lastName', label: 'Last name', type: 'text', autoComplete: 'family-name' },
+    { name: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
+    { name: 'organizationName', label: 'Organization name', type: 'text', autoComplete: 'organization' },
+    { name: 'password', label: 'Password', type: 'password', autoComplete: 'new-password' },
   ];
 
   return (
@@ -50,7 +52,7 @@ export function RegisterPage() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="space-y-4">
+        <form onSubmit={handleSubmit((d) => mutate(d))} className="space-y-4">
           {fields.map(({ name, label, type, autoComplete }) => (
             <div key={name}>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -70,10 +72,10 @@ export function RegisterPage() {
 
           <button
             type="submit"
-            disabled={mutation.isPending}
+            disabled={isPending}
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg px-4 py-2 text-sm transition-colors"
           >
-            {mutation.isPending ? 'Creating account…' : 'Create account'}
+            {isPending ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 
