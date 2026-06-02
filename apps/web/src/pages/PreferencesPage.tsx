@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, type FC } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTheme, applyTheme } from "../contexts/ThemeContext";
-import { getPreferences, updatePreferences, type Preference } from "../api";
+import { getPreferences, updatePreferences } from "../api";
 import {
   preferencesSchema,
   VALID_COLUMNS,
@@ -11,23 +11,22 @@ import {
   type PreferencesFormData,
 } from "../schemas";
 
-const COLUMN_LABELS: Record<string, string> = {
+const COLUMN_LABELS: Record<(typeof VALID_COLUMNS)[number], string> = {
   firstName: "First Name",
   lastName: "Last Name",
   email: "Email",
   role: "Role",
 };
 
-const SORT_LABELS: Record<string, string> = {
+const SORT_LABELS: Record<(typeof VALID_SORTS)[number], string> = {
   firstName: "First Name",
   lastName: "Last Name",
   email: "Email",
 };
 
-export function PreferencesPage() {
-  const { theme, setTheme } = useTheme();
+export const PreferencesPage: FC = () => {
+  const { setTheme } = useTheme();
   const queryClient = useQueryClient();
-  const savedRef = useRef<Preference | null>(null);
 
   const { data } = useQuery({
     queryKey: ["preferences"],
@@ -43,24 +42,20 @@ export function PreferencesPage() {
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
-      theme,
+      theme: "light",
       tablePreferences: {
         visibleColumns: [...VALID_COLUMNS],
         defaultSort: "firstName",
       },
     },
+    values: data
+      ? { theme: data.theme, tablePreferences: data.tablePreferences }
+      : undefined,
   });
 
   useEffect(() => {
-    if (data) {
-      savedRef.current = data;
-      setTheme(data.theme);
-      reset({
-        theme: data.theme,
-        tablePreferences: data.tablePreferences,
-      });
-    }
-  }, [data, reset, setTheme]);
+    if (data) setTheme(data.theme);
+  }, [data, setTheme]);
 
   const liveTheme = useWatch({ control, name: "theme" });
 
@@ -71,13 +66,7 @@ export function PreferencesPage() {
   const { mutate: save, isPending: isSaving } = useMutation({
     mutationFn: updatePreferences,
     onSuccess: (updated) => {
-      savedRef.current = updated;
-      setTheme(updated.theme);
       queryClient.setQueryData(["preferences"], updated);
-      reset({
-        theme: updated.theme,
-        tablePreferences: updated.tablePreferences,
-      });
     },
     onError: (err) => {
       console.error("Failed to save preferences", err);
@@ -85,20 +74,14 @@ export function PreferencesPage() {
   });
 
   const handleReset = () => {
-    if (savedRef.current) {
-      reset({
-        theme: savedRef.current.theme,
-        tablePreferences: savedRef.current.tablePreferences,
-      });
-      setTheme(savedRef.current.theme);
-    }
+    reset();
   };
 
-  const lastSavedAt = savedRef.current?.updatedAt
+  const lastSavedAt = data?.updatedAt
     ? new Intl.DateTimeFormat(undefined, {
         dateStyle: "medium",
         timeStyle: "short",
-      }).format(new Date(savedRef.current.updatedAt))
+      }).format(new Date(data.updatedAt))
     : null;
 
   return (
