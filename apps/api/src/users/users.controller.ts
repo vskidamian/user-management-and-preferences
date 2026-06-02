@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -25,7 +26,7 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles('admin')
   create(@Body() dto: CreateUserDto, @Request() req: any) {
-    return this.usersService.create(dto, req.user.organizationId, dto.role ?? 'member');
+    return this.usersService.create(dto, new Types.ObjectId(req.user.organizationId), dto.role ?? 'member');
   }
 
   @Get()

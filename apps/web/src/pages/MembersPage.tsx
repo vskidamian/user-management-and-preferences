@@ -16,7 +16,7 @@ const COLUMN_LABELS: Record<string, string> = {
 };
 
 export function MembersPage() {
-  const { isAdmin } = useMe();
+  const { isAdmin, user: me } = useMe();
   const queryClient = useQueryClient();
 
   const { data: members = [], isLoading: membersLoading } = useQuery({
@@ -80,6 +80,7 @@ export function MembersPage() {
                     {COLUMN_LABELS[col]}
                   </th>
                 ))}
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -93,24 +94,32 @@ export function MembersPage() {
                   </td>
                 </tr>
               ) : (
-                sorted.map((member) => (
-                  <tr
-                    key={member._id}
-                    className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                  >
-                    {ALL_COLUMNS.filter((col) => visibleColumns.includes(col)).map((col) => (
-                      <td key={col} className="px-4 py-3 text-gray-700 dark:text-gray-300">
-                        {col === 'role' ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
-                            {member[col]}
-                          </span>
-                        ) : (
-                          member[col as keyof Member]
+                sorted.map((member) => {
+                  const isMe = member._id === me?._id;
+                  return (
+                    <tr
+                      key={member._id}
+                      className={`border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isMe ? 'opacity-50 grayscale' : ''}`}
+                    >
+                      {ALL_COLUMNS.filter((col) => visibleColumns.includes(col)).map((col) => (
+                        <td key={col} className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                          {col === 'role' ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                              {member[col]}
+                            </span>
+                          ) : (
+                            member[col as keyof Member]
+                          )}
+                        </td>
+                      ))}
+                      <td className="px-4 py-3">
+                        {isMe && (
+                          <span className="text-xs font-medium text-gray-400 dark:text-gray-500">YOU</span>
                         )}
                       </td>
-                    ))}
-                  </tr>
-                ))
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

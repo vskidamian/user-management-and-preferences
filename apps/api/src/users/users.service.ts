@@ -44,7 +44,7 @@ export class UsersService {
   }
 
   async findAllInOrg(organizationId: string): Promise<UserDocument[]> {
-    return this.userModel.find({ organizationId, isActive: true }).exec();
+    return this.userModel.find({ organizationId: new Types.ObjectId(organizationId), isActive: true }).exec();
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<UserDocument | null> {
