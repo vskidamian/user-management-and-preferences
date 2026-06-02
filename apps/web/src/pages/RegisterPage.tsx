@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router';
-import { api, ApiError } from '../api/client';
+import { api, ApiError } from '../api';
 
 const schema = z.object({
   firstName: z.string().min(1, 'Required'),

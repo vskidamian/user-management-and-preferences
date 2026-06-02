@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTheme } from '../hooks/useTheme';
-import { api, ApiError } from '../api/client';
+import { api } from '../api';
 
 const VALID_COLUMNS = ['firstName', 'lastName', 'email', 'role'] as const;
 const VALID_SORTS = ['firstName', 'lastName', 'email'] as const;
@@ -42,7 +42,7 @@ export function PreferencesPage() {
   const queryClient = useQueryClient();
   const savedRef = useRef<Preference | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ['preferences'],
     queryFn: () => api.get<Preference>('/preferences'),
   });
@@ -102,14 +102,6 @@ export function PreferencesPage() {
         timeStyle: 'short',
       }).format(new Date(savedRef.current.updatedAt))
     : null;
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-lg space-y-8">

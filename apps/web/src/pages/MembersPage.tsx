@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMe } from '../hooks/useMe';
-import { api, ApiError } from '../api/client';
+import { api, ApiError } from '../api';
 
 interface Member {
   _id: string;
