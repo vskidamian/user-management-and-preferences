@@ -1,17 +1,30 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMe } from '../hooks/useMe';
-import { logout as logoutRequest } from '../api';
+import { logout as logoutRequest, getPreferences } from '../api';
+import { useTheme } from '../contexts/ThemeContext';
 import { ROUTES } from '../lib/routes';
+import { useEffect } from 'react';
 
 export function Layout() {
   const { user, isAdmin } = useMe();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { setTheme, resetTheme } = useTheme();
+
+  const { data: preferences } = useQuery({
+    queryKey: ['preferences'],
+    queryFn: getPreferences,
+  });
+
+  useEffect(() => {
+    if (preferences) setTheme(preferences.theme);
+  }, [preferences, setTheme]);
 
   const { mutate: logout, isPending: isLogoutPending } = useMutation({
     mutationFn: logoutRequest,
     onSuccess: () => {
+      resetTheme();
       queryClient.clear();
       navigate(ROUTES.login);
     },

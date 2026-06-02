@@ -8,7 +8,7 @@ import { loginSchema, type LoginFormData } from '../schemas';
 import { ROUTES } from '../lib/routes';
 
 export function LoginPage() {
-  const navigate = useAppNavigate();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -20,8 +20,8 @@ export function LoginPage() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: login,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
+    onSuccess: () => {
+      queryClient.clear();
       navigate(ROUTES.members);
     },
     onError: (err) => handleApiError(err, setError, {

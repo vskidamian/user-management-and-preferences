@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTheme, applyTheme, getStoredTheme } from "../hooks/useTheme";
+import { useTheme, applyTheme } from "../contexts/ThemeContext";
 import { getPreferences, updatePreferences, type Preference } from "../api";
 import {
   preferencesSchema,
@@ -25,7 +25,7 @@ const SORT_LABELS: Record<string, string> = {
 };
 
 export function PreferencesPage() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
   const savedRef = useRef<Preference | null>(null);
 
@@ -43,7 +43,7 @@ export function PreferencesPage() {
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
-      theme: getStoredTheme(),
+      theme,
       tablePreferences: {
         visibleColumns: [...VALID_COLUMNS],
         defaultSort: "firstName",
