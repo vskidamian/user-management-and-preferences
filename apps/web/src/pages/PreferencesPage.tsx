@@ -25,7 +25,7 @@ const SORT_LABELS: Record<(typeof VALID_SORTS)[number], string> = {
 };
 
 export function PreferencesPage() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
 
   const { data } = useQuery({
@@ -42,7 +42,7 @@ export function PreferencesPage() {
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: {
-      theme: "light",
+      theme,
       tablePreferences: {
         visibleColumns: [...VALID_COLUMNS],
         defaultSort: "firstName",
