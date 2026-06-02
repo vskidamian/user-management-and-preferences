@@ -5,9 +5,10 @@ import { useNavigate, Link } from 'react-router';
 import { login, handleApiError } from '../api';
 import { FormRootError } from '../components/FormRootError';
 import { loginSchema, type LoginFormData } from '../schemas';
+import { ROUTES } from '../lib/routes';
 
 export function LoginPage() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const queryClient = useQueryClient();
 
   const {
@@ -21,7 +22,7 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
-      navigate('/members');
+      navigate(ROUTES.members);
     },
     onError: (err) => handleApiError(err, setError, {
       401: { field: 'root', message: 'Invalid email or password' },
@@ -77,7 +78,7 @@ export function LoginPage() {
 
         <p className="text-sm text-center text-gray-600 dark:text-gray-400">
           No account?{' '}
-          <Link to="/register" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+          <Link to={ROUTES.register} className="text-indigo-600 dark:text-indigo-400 hover:underline">
             Register
           </Link>
         </p>

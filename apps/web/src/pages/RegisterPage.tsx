@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router';
 import { register as registerUser, handleApiError } from '../api';
 import { FormRootError } from '../components/FormRootError';
 import { registerSchema, type RegisterFormData } from '../schemas';
+import { ROUTES } from '../lib/routes';
 
 type FormField = { name: keyof RegisterFormData; label: string; type: string; autoComplete: string };
 
@@ -23,7 +24,7 @@ export function RegisterPage() {
     mutationFn: registerUser,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['me'] });
-      navigate('/members');
+      navigate(ROUTES.members);
     },
     onError: (err) => handleApiError(err, setError, {
       409: { field: 'email', message: 'Email already in use' },
@@ -74,7 +75,7 @@ export function RegisterPage() {
 
         <p className="text-sm text-center text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+          <Link to={ROUTES.login} className="text-indigo-600 dark:text-indigo-400 hover:underline">
             Sign in
           </Link>
         </p>

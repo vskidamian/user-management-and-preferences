@@ -1,14 +1,10 @@
-import { ReactNode } from 'react';
-import { NavLink, useNavigate } from 'react-router';
+import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMe } from '../hooks/useMe';
 import { logout as logoutRequest } from '../api';
+import { ROUTES } from '../lib/routes';
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export function Layout({ children }: LayoutProps) {
+export function Layout() {
   const { user, isAdmin } = useMe();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -17,7 +13,7 @@ export function Layout({ children }: LayoutProps) {
     mutationFn: logoutRequest,
     onSuccess: () => {
       queryClient.clear();
-      navigate('/login');
+      navigate(ROUTES.login);
     },
   });
 
@@ -30,13 +26,13 @@ export function Layout({ children }: LayoutProps) {
               {user?.organizationId?.name ?? '…'}
             </span>
             <NavLink
-              to="/members"
+              to={ROUTES.members}
               className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white [&.active]:text-indigo-600 dark:[&.active]:text-indigo-400 [&.active]:font-medium"
             >
               Members
             </NavLink>
             <NavLink
-              to="/preferences"
+              to={ROUTES.preferences}
               className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white [&.active]:text-indigo-600 dark:[&.active]:text-indigo-400 [&.active]:font-medium"
             >
               Preferences
@@ -64,7 +60,7 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
+      <main className="max-w-6xl mx-auto px-4 py-8"><Outlet /></main>
     </div>
   );
 }
