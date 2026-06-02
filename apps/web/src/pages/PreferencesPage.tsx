@@ -1,8 +1,8 @@
 import { useEffect, type FC } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTheme, applyTheme } from "../contexts/ThemeContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { getPreferences, updatePreferences } from "../api";
 import {
   preferencesSchema,
@@ -24,7 +24,7 @@ const SORT_LABELS: Record<(typeof VALID_SORTS)[number], string> = {
   email: "Email",
 };
 
-export const PreferencesPage: FC = () => {
+export function PreferencesPage() {
   const { setTheme } = useTheme();
   const queryClient = useQueryClient();
 
@@ -56,12 +56,6 @@ export const PreferencesPage: FC = () => {
   useEffect(() => {
     if (data) setTheme(data.theme);
   }, [data, setTheme]);
-
-  const liveTheme = useWatch({ control, name: "theme" });
-
-  useEffect(() => {
-    applyTheme(liveTheme);
-  }, [liveTheme]);
 
   const { mutate: save, isPending: isSaving } = useMutation({
     mutationFn: updatePreferences,

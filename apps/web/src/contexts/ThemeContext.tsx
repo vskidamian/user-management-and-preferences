@@ -1,16 +1,23 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
-export type Theme = 'light' | 'dark';
+export type Theme = "light" | "dark";
 
 function getStoredTheme(): Theme {
-  return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+  return localStorage.getItem("theme") === "dark" ? "dark" : "light";
 }
 
 export function applyTheme(theme: Theme) {
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark");
   } else {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove("dark");
   }
 }
 
@@ -30,13 +37,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   const setTheme = useCallback((next: Theme) => {
-    localStorage.setItem('theme', next);
+    localStorage.setItem("theme", next);
     setThemeState(next);
   }, []);
 
   const resetTheme = useCallback(() => {
-    localStorage.removeItem('theme');
-    setThemeState('light');
+    localStorage.removeItem("theme");
+    setThemeState("light");
   }, []);
 
   return (
@@ -48,6 +55,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
   return ctx;
 }
