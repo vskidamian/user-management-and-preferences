@@ -2,12 +2,9 @@ import { useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useTheme } from '../hooks/useTheme';
 import { getPreferences, updatePreferences, type Preference } from '../api';
-
-const VALID_COLUMNS = ['firstName', 'lastName', 'email', 'role'] as const;
-const VALID_SORTS = ['firstName', 'lastName', 'email'] as const;
+import { preferencesSchema, VALID_COLUMNS, VALID_SORTS, type PreferencesFormData } from '../schemas';
 
 const COLUMN_LABELS: Record<string, string> = {
   firstName: 'First Name',
@@ -21,16 +18,6 @@ const SORT_LABELS: Record<string, string> = {
   lastName: 'Last Name',
   email: 'Email',
 };
-
-const schema = z.object({
-  theme: z.enum(['light', 'dark']),
-  tablePreferences: z.object({
-    visibleColumns: z.array(z.enum(VALID_COLUMNS)).min(1, 'Select at least one column'),
-    defaultSort: z.enum(VALID_SORTS),
-  }),
-});
-
-type FormData = z.infer<typeof schema>;
 
 export function PreferencesPage() {
   const { setTheme } = useTheme();
@@ -49,8 +36,8 @@ export function PreferencesPage() {
     reset,
     watch,
     formState: { errors, isDirty },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  } = useForm<PreferencesFormData>({
+    resolver: zodResolver(preferencesSchema),
     defaultValues: {
       theme: 'light',
       tablePreferences: { visibleColumns: [...VALID_COLUMNS], defaultSort: 'firstName' },

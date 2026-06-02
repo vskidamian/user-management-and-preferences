@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useMe } from '../hooks/useMe';
 import { getUsers, createUser, getPreferences, ApiError, type Member } from '../api';
+import { addUserSchema, type AddUserFormData } from '../schemas';
 
 const ALL_COLUMNS = ['firstName', 'lastName', 'email', 'role'] as const;
 
@@ -13,16 +13,6 @@ const COLUMN_LABELS: Record<string, string> = {
   email: 'Email',
   role: 'Role',
 };
-
-const addUserSchema = z.object({
-  firstName: z.string().min(1, 'Required'),
-  lastName: z.string().min(1, 'Required'),
-  email: z.string().email('Invalid email'),
-  password: z.string().min(8, 'Min 8 characters'),
-  role: z.enum(['admin', 'member']).default('member'),
-});
-
-type AddUserFormData = z.infer<typeof addUserSchema>;
 
 export function MembersPage() {
   const { isAdmin } = useMe();

@@ -1,19 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router';
 import { register as registerUser, ApiError } from '../api';
-
-const schema = z.object({
-  firstName: z.string().min(1, 'Required'),
-  lastName: z.string().min(1, 'Required'),
-  email: z.string().email('Invalid email'),
-  organizationName: z.string().min(1, 'Required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-});
-
-type FormData = z.infer<typeof schema>;
+import { registerSchema, type RegisterFormData } from '../schemas';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -24,7 +14,7 @@ export function RegisterPage() {
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) });
 
   const mutation = useMutation({
     mutationFn: registerUser,
